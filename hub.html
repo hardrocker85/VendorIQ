@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorIQ Product Hub</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="hub-page">
+    <nav class="site-nav full-width-nav">
+        <div class="nav-brand">VendorIQ</div>
+        <div class="nav-right-group">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="javascript:void(0)"
+                    onclick="if(localStorage.getItem('viq_user')) window.location.href='hub.html'; else window.location.href='login.html';">Products</a>
+            </div>
+            <div class="nav-actions">
+                <a class="btn-link" href="login.html">Log in</a>
+                <a class="btn-primary nav-cta" href="login.html">Sign up</a>
+                <button class="btn-link nav-logout" id="logout-btn" type="button">Log out</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-shell">
+        <main class="hub-shell">
+            <header class="hub-header">
+                <div>
+                    <span class="hub-kicker">VendorIQ</span>
+                    <h1 class="hub-title">Products</h1>
+                    <p class="hub-subtitle">Create a product to start optimizing prices.</p>
+                </div>
+            </header>
+
+            <section class="product-grid" id="product-grid">
+                <button class="glass-panel product-card product-add" id="add-product-btn" type="button">
+                    <span class="add-plus">+</span>
+                    <span class="add-text">New</span>
+                </button>
+                <!-- Product cards injected here -->
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="product-modal" aria-hidden="true">
+        <div class="modal-card glass-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+            <div class="modal-header">
+                <h2 id="product-modal-title">New Product</h2>
+                <button class="modal-close btn-link" type="button" aria-label="Close">&times;</button>
+            </div>
+            <p class="modal-subtitle">Give your product a clear, short name.</p>
+            <form id="product-form">
+                <label for="product-name-input">Product name</label>
+                <input id="product-name-input" type="text" maxlength="40" placeholder="e.g., Tomatoes" required>
+                <div class="modal-actions">
+                    <button type="button" class="btn-link" id="cancel-product-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="delete-modal" aria-hidden="true">
+        <div class="modal-card glass-panel" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+            <div class="modal-header">
+                <h2 id="delete-modal-title">Delete Product</h2>
+                <button class="modal-close btn-link" type="button" aria-label="Close">&times;</button>
+            </div>
+            <p class="modal-subtitle" id="delete-modal-text">This will remove the product and its data.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-link" id="cancel-delete-btn">Cancel</button>
+                <button type="button" class="btn-danger" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer split-footer">
+        <div class="footer-left">
+            <h3 class="footer-brand">VendorIQ</h3>
+            <p>Data-driven profit optimization for modern vendors. Eliminate the guesswork from your pricing strategy
+                entirely.</p>
+            <p class="copyright">&copy; 2026 VendorIQ. All rights reserved.</p>
+        </div>
+        <div class="footer-right">
+            <h4>Start optimizing today</h4>
+            <div class="footer-actions">
+                <a class="btn-link" href="login.html">Log in</a>
+                <a class="btn-primary" href="login.html">Sign up</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('page-ready');
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const url = new URL(link.href, window.location.href);
+                if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.body.classList.add('page-exit');
+                        setTimeout(() => { window.location.href = link.href; }, 180);
+                    });
+                }
+            });
+        });
+
+        const authed = localStorage.getItem('viq_user');
+        if (!authed) {
+            window.location.href = 'login.html';
+        }
+        const navActions = document.querySelector('.nav-actions');
+        const navLogout = document.getElementById('logout-btn');
+        if (authed) {
+            navActions.querySelectorAll('a').forEach(link => link.remove());
+            navLogout.style.display = 'inline-flex';
+        }
+
+        const productGrid = document.getElementById('product-grid');
+        const addBtn = document.getElementById('add-product-btn');
+        const storageKey = `viq_products_${authed}`;
+
+        const loadProducts = () => {
+            try {
+                return JSON.parse(localStorage.getItem(storageKey)) || [];
+            } catch (e) {
+                return [];
+            }
+        };
+
+        const saveProducts = (products) => {
+            localStorage.setItem(storageKey, JSON.stringify(products));
+        };
+
+        const renderProducts = () => {
+            const existingCards = productGrid.querySelectorAll('.product-card[data-id]');
+            existingCards.forEach(card => card.remove());
+            const products = loadProducts();
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel product-card';
+                card.dataset.id = product.id;
+                card.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-meta">Created ${new Date(product.createdAt).toLocaleDateString()}</div>
+                    <div class="product-actions">
+                        <button class="btn-primary product-open" type="button">Open Optimizer</button>
+                        <button class="btn-link product-delete" type="button">Delete</button>
+                    </div>
+                `;
+                card.querySelector('.product-open').addEventListener('click', () => {
+                    localStorage.setItem('viq_active_product', product.id);
+                    window.location.href = `app.html?product=${encodeURIComponent(product.id)}`;
+                });
+                card.querySelector('.product-delete').addEventListener('click', () => {
+                    openDeleteModal(product);
+                });
+                productGrid.appendChild(card);
+            });
+        };
+
+        const modal = document.getElementById('product-modal');
+        const modalClose = modal.querySelector('.modal-close');
+        const modalCancel = document.getElementById('cancel-product-btn');
+        const productForm = document.getElementById('product-form');
+        const nameInput = document.getElementById('product-name-input');
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteClose = deleteModal.querySelector('.modal-close');
+        const deleteCancel = document.getElementById('cancel-delete-btn');
+        const deleteConfirm = document.getElementById('confirm-delete-btn');
+        const deleteText = document.getElementById('delete-modal-text');
+        let pendingDeleteId = null;
+
+        const openModal = () => {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            nameInput.value = '';
+            setTimeout(() => nameInput.focus(), 50);
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        };
+
+        const openDeleteModal = (product) => {
+            pendingDeleteId = product.id;
+            deleteText.textContent = `Delete "${product.name}"? This removes its data too.`;
+            deleteModal.classList.add('open');
+            deleteModal.setAttribute('aria-hidden', 'false');
+            deleteCancel.focus();
+        };
+
+        const closeDeleteModal = () => {
+            deleteModal.classList.remove('open');
+            deleteModal.setAttribute('aria-hidden', 'true');
+            pendingDeleteId = null;
+        };
+
+        addBtn.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+            if (e.key === 'Escape' && deleteModal.classList.contains('open')) closeDeleteModal();
+        });
+
+        deleteClose.addEventListener('click', closeDeleteModal);
+        deleteCancel.addEventListener('click', closeDeleteModal);
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = nameInput.value.trim();
+            if (!name) return;
+            const products = loadProducts();
+            const newProduct = {
+                id: `p_${Date.now()}`,
+                name,
+                createdAt: Date.now()
+            };
+            products.unshift(newProduct);
+            saveProducts(products);
+            localStorage.setItem('viq_active_product', newProduct.id);
+            renderProducts();
+            closeModal();
+            window.location.href = `app.html?product=${encodeURIComponent(newProduct.id)}`;
+        });
+
+        deleteConfirm.addEventListener('click', () => {
+            if (!pendingDeleteId) return;
+            const updated = loadProducts().filter(p => p.id !== pendingDeleteId);
+            saveProducts(updated);
+            localStorage.removeItem(`viq_product_data_${authed}_${pendingDeleteId}`);
+            closeDeleteModal();
+            renderProducts();
+        });
+
+        navLogout.addEventListener('click', () => {
+            localStorage.removeItem('viq_user');
+            window.location.href = 'login.html';
+        });
+
+        renderProducts();
+    </script>
+</body>
+</html>

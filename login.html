@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorIQ Login</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container auth-container">
+        <div class="glass-panel auth-card">
+            <h1 class="auth-title">VendorIQ</h1>
+            <p class="auth-subtitle">Sign in to manage your pricing tools</p>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-target="login-panel" type="button">Login</button>
+                <button class="tab-btn" data-target="signup-panel" type="button">Sign Up</button>
+            </div>
+
+            <form id="login-panel" class="auth-form">
+                <label>Email</label>
+                <input type="email" id="login-email" required>
+                <label>Password</label>
+                <input type="password" id="login-password" required>
+                <button class="btn-primary" type="submit">Log In</button>
+            </form>
+
+            <form id="signup-panel" class="auth-form hide">
+                <label>Company Name</label>
+                <input type="text" id="signup-company" required>
+                <label>Email</label>
+                <input type="email" id="signup-email" required>
+                <label>Password</label>
+                <input type="password" id="signup-password" required>
+                <button class="btn-primary" type="submit">Create Account</button>
+            </form>
+
+            <div class="auth-divider">Or continue with</div>
+            <div class="oauth-row">
+                <button class="btn-ghost oauth-google" type="button" disabled>
+                    <svg class="oauth-logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.2 1.52 7.62 2.79l5.18-5.18C33.46 3.9 29.1 2 24 2 14.7 2 6.76 7.38 3.5 15.2l6.55 5.08C11.64 13.9 17.3 9.5 24 9.5z"/>
+                        <path fill="#34A853" d="M46.1 24.6c0-1.62-.15-3.18-.44-4.68H24v8.86h12.4c-.54 2.94-2.2 5.42-4.68 7.1l7.18 5.56c4.2-3.88 6.6-9.6 6.6-16.9z"/>
+                        <path fill="#4A90E2" d="M10.05 28.28c-.54-1.6-.86-3.3-.86-5.08s.32-3.48.86-5.08l-6.55-5.08C2.22 15.86 1.5 19.1 1.5 22.2s.72 6.34 2 9.16l6.55-5.08z"/>
+                        <path fill="#FBBC05" d="M24 44c5.1 0 9.38-1.68 12.5-4.56l-7.18-5.56c-2.02 1.36-4.6 2.16-7.32 2.16-6.7 0-12.36-4.4-14.4-10.58l-6.55 5.08C6.76 40.62 14.7 44 24 44z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+            </div>
+            <p class="auth-note">Social login needs a backend integration. I can wire it once you pick a provider.</p>
+            <div class="auth-message" id="auth-message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('page-ready');
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const url = new URL(link.href, window.location.href);
+                if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.body.classList.add('page-exit');
+                        setTimeout(() => { window.location.href = link.href; }, 180);
+                    });
+                }
+            });
+        });
+
+        const tabs = document.querySelectorAll('.auth-tabs .tab-btn');
+        const panels = document.querySelectorAll('.auth-form');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.add('hide'));
+                tab.classList.add('active');
+                document.getElementById(tab.getAttribute('data-target')).classList.remove('hide');
+            });
+        });
+
+        document.getElementById('login-panel').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const users = JSON.parse(localStorage.getItem('viq_users') || '{}');
+            const msg = document.getElementById('auth-message');
+            msg.textContent = '';
+
+            if (!users[email] || users[email].password !== password) {
+                msg.textContent = 'No account found or incorrect password. Please sign up first.';
+                return;
+            }
+
+            localStorage.setItem('viq_user', JSON.stringify({ email }));
+            window.location.href = 'hub.html';
+        });
+
+        document.getElementById('signup-panel').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            const company = document.getElementById('signup-company').value.trim();
+            const users = JSON.parse(localStorage.getItem('viq_users') || '{}');
+            const msg = document.getElementById('auth-message');
+            msg.textContent = '';
+
+            if (users[email]) {
+                msg.textContent = 'Account already exists. Please log in instead.';
+                return;
+            }
+
+            users[email] = { password, company };
+            localStorage.setItem('viq_users', JSON.stringify(users));
+            localStorage.setItem('viq_user', JSON.stringify({ email }));
+            window.location.href = 'hub.html';
+        });
+    </script>
+</body>
+</html>

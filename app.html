@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Vendor Price Optimization Tool - Maximize your profit based on historical sales data.">
+    <title>Vendor Price Optimizer</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="app-page">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="app-header-top">
+                <div class="app-title-block">
+                    <h1>Vendor Price Optimizer</h1>
+                </div>
+                <div class="header-actions">
+                    <a class="btn-link" href="hub.html">Back to Products</a>
+                </div>
+            </div>
+            <p class="subtitle" id="product-subtitle">Data-driven profit maximization for street vendors</p>
+        </header>
+
+        <!-- Charts Area -->
+        <div class="charts-container">
+            <div class="chart-header">
+                <h2>Market Insights</h2>
+                <div class="chart-tabs">
+                    <button class="tab-btn active" data-target="demand-chart-container">Demand</button>
+                    <button class="tab-btn" data-target="profit-chart-container">Profit</button>
+                    <button class="tab-btn" data-target="cost-chart-container">Trends</button>
+                </div>
+            </div>
+
+            <div class="chart-wrapper active" id="demand-chart-container">
+                <canvas id="demandChart"></canvas>
+                <p class="chart-caption">Price vs Quantity (Demand Curve)</p>
+            </div>
+            <div class="chart-wrapper hide" id="profit-chart-container">
+                <canvas id="profitChart"></canvas>
+                <p class="chart-caption">Simulated Profit across Price Points</p>
+            </div>
+            <div class="chart-wrapper hide" id="cost-chart-container">
+                <canvas id="trendsChart"></canvas>
+                <p class="chart-caption">Historical Metrics over Time</p>
+            </div>
+        </div>
+
+        <!-- Main Content Layout -->
+        <div class="content-layout">
+            <!-- Left Column: Input Form & Recommendation -->
+            <div class="left-column">
+                <!-- Optimization Recommendation Panel -->
+                <div class="glass-panel recommendation-panel" id="recommendation-panel">
+                    <h2>AI Recommendation</h2>
+                    <div class="needs-data-msg" id="needs-data-msg">
+                        <p>Requires at least 3 entries of variable data to generate a recommendation.</p>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="data-progress" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progress-text">0 / 3 entries logged</span>
+                    </div>
+
+                    <div class="optimal-result hide" id="optimal-result">
+                        <div class="rec-price-label">Recommended Selling Price</div>
+                        <div class="rec-price-value" id="rec-price">₹--</div>
+                        <div class="rec-insight" id="rec-insight">
+                            <span class="insight-badge" id="insight-badge">--</span>
+                            <span class="insight-text" id="insight-text">Analyzing market elasticity...</span>
+                        </div>
+                        <div class="model-equation" id="model-equation">
+                            Demand Model: Q = aP + b
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Entry Form -->
+                <div class="glass-panel form-panel">
+                    <h2>Log Data</h2>
+                    <p class="form-desc">Enter totals for each entry to improve recommendations.</p>
+                    <form id="daily-data-form">
+                        <div class="input-group">
+                            <label for="revenue-input">Total Revenue (₹)</label>
+                            <input type="number" id="revenue-input" step="1" min="0" placeholder="e.g., 900"
+                                required>
+                        </div>
+                        <div class="input-group">
+                            <label for="cost-input">Total Cost (₹)</label>
+                            <input type="number" id="cost-input" step="1" min="0" placeholder="e.g., 600" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="quantity-input">Quantity Sold</label>
+                            <input type="number" id="quantity-input" min="1" step="1" placeholder="e.g., 20" required>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <span>Add Record</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="glass-panel actions-panel">
+                    <button id="clear-data-btn" class="btn-danger">Clear All Data</button>
+                </div>
+
+            </div>
+
+            <!-- Middle Column: Metrics -->
+            <div class="metrics-column">
+                <section class="metrics-grid metrics-vertical">
+                    <div class="metric-card glass-panel">
+                        <div class="metric-title">Current Avg Price</div>
+                        <div class="metric-value" id="metric-avg-price">₹0.00</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-title">Avg Daily Demand</div>
+                        <div class="metric-value" id="metric-avg-demand">0</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-title">Avg Cost Per Unit</div>
+                        <div class="metric-value" id="metric-avg-cost">₹0.00</div>
+                    </div>
+                    <div class="metric-card glass-panel highlight-metric">
+                        <div class="metric-title">Avg Daily Profit</div>
+                        <div class="metric-value" id="metric-avg-profit">₹0.00</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Table -->
+            <div class="right-column">
+                <!-- Data Table -->
+                <div class="table-container glass-panel">
+                    <div class="table-header">
+                        <h2>Historical Records</h2>
+                        <span class="record-count" id="record-count">0 entries</span>
+                    </div>
+                    <div class="table-scroll">
+                        <table id="records-table">
+                            <thead>
+                                <tr>
+                                    <th>Entry</th>
+                                    <th>Revenue</th>
+                                    <th>Cost</th>
+                                    <th>Qty</th>
+                                    <th>Avg Price</th>
+                                    <th>Avg Cost</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Records injected by JS -->
+                                <tr class="empty-row" id="empty-row-msg">
+                                    <td colspan="7">No data logged yet. Add your first entry.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('page-ready');
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const url = new URL(link.href, window.location.href);
+                if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.body.classList.add('page-exit');
+                        setTimeout(() => { window.location.href = link.href; }, 180);
+                    });
+                }
+            });
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+
+</html>

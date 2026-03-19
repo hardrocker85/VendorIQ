@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorIQ About</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="marketing-page">
+    <nav class="site-nav full-width-nav">
+        <div class="nav-brand">VendorIQ</div>
+        <div class="nav-right-group">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="javascript:void(0)"
+                    onclick="if(localStorage.getItem('viq_user')) window.location.href='hub.html'; else window.location.href='login.html';">Products</a>
+            </div>
+            <div class="nav-actions">
+                <a class="btn-link" href="login.html">Log in</a>
+                <a class="btn-primary nav-cta" href="login.html">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-shell" style="padding-top: 140px; padding-bottom: 80px;">
+        <section class="creator-note" style="max-width: 800px; margin: 0 auto; padding: 0 20px;">
+            <h1 class="hero-title" style="margin-bottom: 30px; font-size: 2.5rem; text-align: left;">A Note from the
+                Creator</h1>
+            <div class="note-content" style="color: var(--text-muted); line-height: 1.8; font-size: 1.1rem;">
+                <p style="margin-bottom: 20px;">Hey there,</p>
+                <p style="margin-bottom: 20px;">My name is Yash, and I’m a 14-year-old student building a small project
+                    to solve a real problem I see every day—helping street vendors make better pricing decisions.</p>
+                <p style="margin-bottom: 20px;">Most vendors rely on guesswork, experience, or copying nearby prices.
+                    But with bargaining, changing costs, and unpredictable demand, it’s not that simple. A small pricing
+                    mistake can mean losing profit for the whole day. I wanted to build something that actually helps
+                    them make smarter decisions, without making things complicated.</p>
+                <p style="margin-bottom: 20px;">So I created a tool where vendors can just enter their daily sales—how
+                    much they earned, how much their goods cost, and how many items they sold. Based on this, the app
+                    analyzes patterns over a few days and suggests a better price to try next.</p>
+                <p style="margin-bottom: 20px;">I’m still improving it—making the UI better, increasing accuracy, and
+                    turning it into a full website with accounts and multiple products.</p>
+                <p style="margin-bottom: 20px;">If this idea grows and starts helping real people earn even a little
+                    more consistently, that’s all I’m aiming for.</p>
+                <p style="color: var(--text-main); font-weight: 500;">– Yash 🙏</p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer split-footer">
+        <div class="footer-left">
+            <h3 class="footer-brand">VendorIQ</h3>
+            <p>Data-driven profit optimization for modern vendors. Eliminate the guesswork from your pricing strategy
+                entirely.</p>
+            <p class="copyright">&copy; 2026 VendorIQ. All rights reserved.</p>
+        </div>
+        <div class="footer-right">
+            <h4>Start optimizing today</h4>
+            <div class="footer-actions">
+                <a class="btn-link" href="login.html">Log in</a>
+                <a class="btn-primary" href="login.html">Sign up</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('page-ready');
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const url = new URL(link.href, window.location.href);
+                if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.body.classList.add('page-exit');
+                        setTimeout(() => { window.location.href = link.href; }, 180);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
